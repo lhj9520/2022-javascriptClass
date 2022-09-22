@@ -1,0 +1,21 @@
+.slides {
+  display: flex;
+  flex-direction: row;
+  /* border: 3px solid red; */
+}
+
+.slides > div {
+  border: 15px solid green;
+  height: 150px;
+  width: 150px;
+}
+
+button {
+  margin: 10px;
+  height: 100px;
+  width: 100px;
+}
+
+.active {
+  border: 15px solid red !important;
+}
