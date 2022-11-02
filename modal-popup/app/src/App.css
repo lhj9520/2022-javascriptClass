@@ -1,0 +1,140 @@
+* {
+  box-sizing: border-box;
+  padding: 0px;
+  margin: 0px;
+}
+
+ul,
+li {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.wrapper {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-wrap: wrap;
+  padding: 40px 20px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.screen {
+  background-color: #fff;
+  box-sizing: border-box;
+  width: 340px;
+  height: 600px;
+  box-shadow: 0 3.2px 2.2px rgb(0 0 0 / 2%), 0 7px 5.4px rgb(0 0 0 / 3%),
+    0 12.1px 10.1px rgb(0 0 0 / 4%), 0 19.8px 18.1px rgb(0 0 0 / 4%),
+    0 34.7px 33.8px rgb(0 0 0 / 5%), 0 81px 81px rgb(0 0 0 / 7%);
+  border-radius: 30px;
+  overflow-y: scroll;
+  padding: 0 28px;
+  position: relative;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+}
+
+.logo {
+  display: block;
+  width: 50px;
+}
+
+.screen > .title {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 20px 0;
+  position: relative;
+}
+
+.item-block > .image-area {
+  border-radius: 30px;
+  height: 380px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.item-block > .image-area > .image {
+  display: block;
+  width: 100%;
+  filter: drop-shadow(0 30px 20px rgba(0, 0, 0, 0.2));
+  transform: rotate(-24deg);
+  margin-left: -16px;
+  cursor: pointer;
+}
+
+.item-block > .name {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 26px 0 20px;
+  line-height: 1.5;
+}
+
+.item-block > .bottom-area {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.item-block > .description {
+  font-size: 13px;
+  color: #777;
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+
+.screen::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera*/
+}
+
+.price {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.button {
+  background-color: #f8d43f;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.button > p {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.modal {
+  position: fixed;
+  top: 25%;
+  left: 50%;
+  transform: translate(-50%, 0%);
+  min-width: 300px;
+  min-height: 300px;
+  border-radius: 24px;
+  background-color: #fff;
+  border-radius: 0 0 0 1px rgb(53 72 91 / 7%), 0 2px 2px rgb(0 0 0 / 1%),
+    0 4px 4px rgb(0 0 0 / 2%), 0 10px 8px rgb(0 0 0 / 3%),
+    0 15px 15px rgb(0 0 0 / 3%), 0 30px 30px rgb(0 0 0 / 4%),
+    0 70px 65px rgb(0 0 0 / 5%);
+  border: 1px solid #eee;
+  padding: 12px;
+}
+
+.modal-bg {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  background: black;
+  opacity: 0.4;
+  position: fixed;
+  top: 0px;
+}
