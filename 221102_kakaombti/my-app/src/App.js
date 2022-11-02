@@ -2,7 +2,9 @@ import React from "react";
 import logo from "./logo.svg";
 import "./App.css";
 
-import { Routes, Route, useNavigate } from "react-router-dom";
+import axios from "axios";
+
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 
 const ProgressBar = (props) => {
   // 총너비 / 총스텝길이 * 현재스텝
@@ -34,9 +36,7 @@ const Answer = (props) => {
       onClick={() => {
         setDispatchType({
           code: "답변",
-          params: {
-            value: props.value,
-          },
+          params: { value: props.value },
         });
       }}
     >
@@ -110,6 +110,25 @@ function On5() {
 }
 
 function Result() {
+  const { state } = useLocation();
+
+  const MBTI결과가져오기 = () => {
+    axios({
+      url: "http://localhost:5000/mbti",
+      methos: "GET",
+      responseType: "json",
+      params: state,
+    })
+      .then(() => {})
+      .catch((e) => {
+        console.log("에러!!", e);
+      });
+  };
+
+  React.useEffect(() => {
+    MBTI결과가져오기();
+  }, []);
+
   return <div>결과화면 !!</div>;
 }
 
@@ -138,6 +157,8 @@ function Main() {
 const StoreContext = React.createContext({});
 
 function App() {
+  const navigation = useNavigate();
+
   const [dispatch, setDispatchType] = React.useState({
     code: null,
     params: null,
@@ -162,6 +183,8 @@ function App() {
     },
   ]);
 
+  let [page, setPage] = React.useState(1);
+
   const [loginUser, setLoginUser] = React.useState({
     id: "zz",
     pw: "zz",
@@ -174,7 +197,25 @@ function App() {
        */
       case "답변":
         const { value } = dispatch.params;
+        const clonembti = [...mbti];
 
+        const findIndex = clonembti.findIndex((item) => {
+          return item[value] !== undefined;
+        });
+
+        clonembti[findIndex][value]++;
+        setMbti(clonembti);
+
+        const nextPage = (page += 1);
+        setPage(nextPage);
+
+        if (nextPage === 6) {
+          navigation("/result", {
+            state: mbti,
+          });
+        } else {
+          navigation(`/on${nextPage}`);
+        }
         break;
 
       /**
