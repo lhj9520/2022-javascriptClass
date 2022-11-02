@@ -110,16 +110,23 @@ function On5() {
 }
 
 function Result() {
+  const navigation = useNavigate();
+
   const { state } = useLocation();
 
-  const MBTI결과가져오기 = () => {
-    axios({
+  const [result, setResult] = React.useState(undefined);
+
+  const MBTI결과가져오기 = async () => {
+    await axios({
       url: "http://localhost:5000/mbti",
       methos: "GET",
       responseType: "json",
       params: state,
     })
-      .then(() => {})
+      .then(({ data }) => {
+        // console.log(data);
+        setResult(data);
+      })
       .catch((e) => {
         console.log("에러!!", e);
       });
@@ -129,7 +136,23 @@ function Result() {
     MBTI결과가져오기();
   }, []);
 
-  return <div>결과화면 !!</div>;
+  if (result === undefined) {
+    return <div></div>;
+  }
+
+  return (
+    <div className="main-app">
+      <img className="result-img" src={result.content} alt="결과화면" />
+      <button
+        className="btn"
+        onClick={() => {
+          navigation("/on1");
+        }}
+      >
+        다시하기
+      </button>
+    </div>
+  );
 }
 
 function Main() {
