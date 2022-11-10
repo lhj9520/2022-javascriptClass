@@ -57,13 +57,13 @@ app.get("/mbti", (req, res) => {
       result += rightk;
     }
   }
-  //   console.log(result);
+  console.log(result);
 
   const [result2] = characters.filter((item, index) => {
     return item.mbti === result;
   });
 
-  //   console.log(result2);
+  console.log(result2);
 
   res.send(result2);
 });

@@ -116,6 +116,8 @@ function Result() {
 
   const [result, setResult] = React.useState(undefined);
 
+  const { setDispatchType } = React.useContext(StoreContext);
+
   const MBTI결과가져오기 = async () => {
     await axios({
       url: "http://localhost:5000/mbti",
@@ -134,6 +136,9 @@ function Result() {
 
   React.useEffect(() => {
     MBTI결과가져오기();
+    setDispatchType({
+      code: "로컬스토리지삭제",
+    });
   }, []);
 
   if (result === undefined) {
@@ -156,7 +161,32 @@ function Result() {
 }
 
 function Main() {
+  /**
+   * 왜가져왔는지?
+   * App으로 넘기기위해~
+   */
+  const { setDispatchType } = React.useContext(StoreContext);
+
   const navigation = useNavigate();
+  /**
+   * 로컬스토리지 적용
+   */
+  React.useEffect(() => {
+    /* 여기서 하지 말고
+    const 기억되어있는MBTI = localStorage.getItem('MBTI');
+    const 기억되어있는PAGE = localStorage.getItem('PAGE');
+    //mbti 값 교체
+    //페이지 값 교체
+    if(기억되어있는MBTI && 기억되어있는PAGE){
+    }*/
+
+    /**
+     * APP에서 응답코드 별 처리하는곳으로 넘김
+     */
+    setDispatchType({
+      code: "임시저장",
+    });
+  }, []); //빈 배열 한번만 실행 중요!!
 
   return (
     <div className="main-app">
@@ -229,9 +259,23 @@ function App() {
         clonembti[findIndex][value]++;
         setMbti(clonembti);
 
+        /**
+         * 페이지 이동
+         */
         const nextPage = (page += 1);
         setPage(nextPage);
 
+        /**로컬스토리지에 데이터 저장
+         * mbti 결과 객체
+         * 다음페이지정보
+         */
+        localStorage.setItem("MBTI", JSON.stringify(clonembti));
+        localStorage.setItem("PAGE", nextPage);
+
+        /**
+         * 페이지 이동 on숫자(증가)
+         * 마지막 페이지일때 예외처리 결과페이지로 이동
+         */
         if (nextPage === 6) {
           navigation("/result", {
             state: mbti,
@@ -240,11 +284,43 @@ function App() {
           navigation(`/on${nextPage}`);
         }
         break;
-
       /**
-       * 로그인 하는 로직 구현
+       * 임시저장 로직 구현
        */
-      case "로그인":
+      case "임시저장":
+        const 기억되어있는MBTI = localStorage.getItem("MBTI");
+        const 기억되어있는PAGE = localStorage.getItem("PAGE");
+
+        if (기억되어있는PAGE > "5") {
+          localStorage.removeItem("MBTI");
+          localStorage.removeItem("PAGE");
+          return;
+        }
+        /**
+         * 저장되어있는 mbti 값으로 교체
+         * 저장되어있는 페이지로 교체
+         */
+        if (기억되어있는MBTI && 기억되어있는PAGE) {
+          const 기억되어있는MBTI배열 = JSON.parse(기억되어있는MBTI);
+          setMbti(기억되어있는MBTI배열);
+          setPage(Number(기억되어있는PAGE)); //페이지는 숫자로 들어가야함
+          navigation(`/on${기억되어있는PAGE}`);
+        }
+        break;
+      /**내가 추가한 부분
+       * result에서 다시하기 버튼을 누르면 여기로 이동
+       * page와 mbti 데이터 초기화가 안되서 강제로 초기화 시켜줌
+       */
+      case "로컬스토리지삭제":
+        localStorage.removeItem("MBTI");
+        localStorage.removeItem("PAGE");
+        setPage(1);
+        setMbti([
+          { E: 0, I: 0 },
+          { N: 0, S: 0 },
+          { F: 0, T: 0 },
+          { J: 0, P: 0 },
+        ]);
         break;
 
       default:
