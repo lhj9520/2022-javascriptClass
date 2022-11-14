@@ -1,5 +1,5 @@
 import axios from "axios";
-import React from "react";
+import React, { useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import "./App.css";
 
@@ -61,7 +61,7 @@ function Join() {
 }
 
 function Login() {
-  const navigation = useNavigate();
+  // const navigation = useNavigate();
 
   const [data, setData] = React.useState({
     id: "",
@@ -104,8 +104,138 @@ function Login() {
   );
 }
 
+function Write() {
+  const navigation = useNavigate();
+  /**
+   * 제목,내용 입력 state에 저장한 후
+   * 작성하기 누르면 서버에 요청 보내기
+   * 다 하신분들은 Mysql article 테이블에 저장까지 해주세요~
+   */
+  const { loginUser } = React.useContext(StoreContext);
+
+  const [data, setData] = React.useState({
+    title: "",
+    body: "",
+  });
+
+  const 데이터변경 = (event) => {
+    const name = event.target.name;
+    const cloneData = { ...data };
+    cloneData[name] = event.target.value;
+    setData(cloneData);
+  };
+
+  const 작성하기 = async () => {
+    // console.log(data);
+
+    await axios({
+      url: "http://localhost:4000/article",
+      method: "POST",
+      data: data,
+    })
+      .then((res) => {
+        const { code, message } = res.data;
+        console.log(message);
+        if (code === "success") {
+          alert(message);
+          navigation("/");
+        }
+      })
+      .catch((e) => {
+        console.log("write Error", e);
+      });
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", padding: 12 }}>
+      <h2>게시글 작성</h2>
+      <h3>제목</h3>
+      <input name="title" onChange={데이터변경} />
+      <h3>내용</h3>
+      <textarea
+        cols="50"
+        rows="10"
+        name="body"
+        onChange={데이터변경}
+      ></textarea>
+      <button type="button" onClick={작성하기}>
+        작성하기
+      </button>
+    </div>
+  );
+}
+
 function Main() {
-  return <div>Main</div>;
+  const navigation = useNavigate();
+  const [article, setArticle] = React.useState({
+    title: "",
+    body: "",
+    user_seq: "",
+  });
+
+  const { loginUser } = React.useContext(StoreContext);
+
+  const 글목록요청 = async () => {
+    // console.log(data);
+
+    await axios({
+      url: "http://localhost:4000/articlelist",
+      method: "GET",
+    })
+      .then((res) => {
+        const { code, message, list } = res.data;
+        console.log(message);
+        if (code === "success") {
+          console.log(list);
+          setArticle(list);
+        }
+      })
+      .catch((e) => {
+        console.log("write Error", e);
+      });
+  };
+
+  React.useEffect(() => {
+    글목록요청();
+  }, []);
+
+  return (
+    <div>
+      <h2>{loginUser.nickname}님 안녕하세요!</h2>
+      <button
+        type="button"
+        onClick={() => {
+          navigation("/write");
+        }}
+      >
+        글작성하기
+      </button>
+      <div>
+        <h2>글목록</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>제목</th>
+              <th>내용</th>
+              <th>작성자</th>
+            </tr>
+          </thead>
+          <tbody>
+            {article.length > 0 &&
+              article.map((item) => {
+                return (
+                  <tr key={item.seq}>
+                    <th>{item.title}</th>
+                    <th>{item.body}</th>
+                    <th>{item.user_seq}</th>
+                  </tr>
+                );
+              })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 }
 
 /**
@@ -145,6 +275,7 @@ function App() {
         <Route exact path="/" element={<Main />} />
         <Route exact path="/login" element={<Login />} />
         <Route exact path="/join" element={<Join />} />
+        <Route exact path="/write" element={<Write />} />
       </Routes>
     </StoreContext.Provider>
   );

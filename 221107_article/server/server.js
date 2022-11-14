@@ -153,6 +153,63 @@ app.post("/login", async (req, res) => {
   res.send(result);
 });
 
+app.post("/article", async (req, res) => {
+  const { title, body } = req.body;
+
+  // console.log(req.session.loginUser);
+  const { loginUser } = req.session;
+  // console.log(user.seq);
+
+  const result = {
+    code: "success",
+    message: "글작성완료",
+  };
+
+  /**
+   * 빈제목, 빈내용 예외처리
+   */
+  if (title === "") {
+    result.code = "fail";
+    result.message = "제목을 작성해주세요";
+  }
+
+  if (body === "") {
+    result.code = "fail";
+    result.message = "내용을 작성해주세요";
+  }
+
+  if (result.code === "fail") {
+    res.send(result);
+    return;
+  }
+
+  /**
+   * Mysql article 테이블에 INSERT 해줘야함 !!
+   */
+  const query = `INSERT INTO article(title,body,user_seq) VALUES('${title}','${body}','${loginUser.seq}')`;
+  await 디비실행(query);
+
+  res.send(result);
+});
+
+app.get("/articlelist", async (req, res) => {
+  const result = {
+    code: "success",
+    message: "글목록불러오기완료",
+    list: [],
+  };
+
+  /**
+   * Mysql article 테이블 전체 조회
+   */
+  const query = `SELECT * FROM article`;
+  const 글목록 = await 디비실행(query);
+  // console.log(글목록);
+  result.list = 글목록;
+
+  res.send(result);
+});
+
 app.listen(port, () => {
   console.log("서버가 시작되었습니다");
 });
