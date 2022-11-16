@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useState } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, useParams } from "react-router-dom";
 import "./App.css";
 
 // 도메인 달라도 쿠키공유해줄게
@@ -165,12 +165,127 @@ function Write() {
   );
 }
 
+function Article() {
+  const { loginUser } = React.useContext(StoreContext);
+
+  const { seq } = useParams();
+
+  const [article, setArticle] = React.useState({
+    seq: "",
+    title: "",
+    body: "",
+    nickname: "",
+  });
+
+  const [reply, setReply] = React.useState({
+    nickname: "",
+    boody: "",
+  });
+
+  const [regreply, setregReply] = React.useState({
+    user_seq: "",
+    article_seq: "",
+    body: "",
+  });
+
+  const 데이터변경 = (event) => {
+    const name = event.target.name;
+    const cloneData = { ...regreply };
+    cloneData[name] = event.target.value;
+    cloneData.user_seq = loginUser.seq;
+    cloneData.article_seq = article.seq;
+    // console.log(cloneData);
+    setregReply(cloneData);
+  };
+
+  const 글상세요청 = async () => {
+    await axios({
+      url: "http://localhost:4000/articleview",
+      params: {
+        seq: seq,
+      },
+    })
+      .then((res) => {
+        const { code, message, article, reply } = res.data;
+        // console.log(message);
+        if (code === "success") {
+          // console.log(article[0]);
+          // console.log(reply);
+          setArticle(article[0]);
+          setReply(reply);
+        }
+      })
+      .catch((e) => {
+        console.log("글상세보기에러", e);
+      });
+  };
+
+  const 댓글등록 = async () => {
+    await axios({
+      url: "http://localhost:4000/reply",
+      method: "POST",
+      data: regreply,
+    })
+      .then((res) => {
+        // console.log(res.data);
+        const { code, message } = res.data;
+        if (code === "fail") {
+          alert(message);
+        } else {
+          글상세요청();
+        }
+      })
+      .catch((e) => {
+        console.log("댓글등록에러", e);
+      });
+  };
+
+  React.useEffect(() => {
+    글상세요청();
+  }, []);
+
+  return (
+    <div className="ui-wrap">
+      <div className="ui-body-wrap">
+        <h2>
+          {article.title}&nbsp;&nbsp;&nbsp;{article.nickname}
+        </h2>
+        <div className="ui-body">
+          <p>{article.body}</p>
+        </div>
+        <h3>댓글</h3>
+        <div className="ui-reply">
+          {reply.length === 0 && <p>댓글이 없습니다</p>}
+          {reply.length > 0 &&
+            reply.map((item, index) => {
+              return (
+                <p key={index}>
+                  {item.nickname}&nbsp;&nbsp;&nbsp;
+                  {item.boody}
+                </p>
+              );
+            })}
+        </div>
+
+        <form className="ui-reply-form">
+          <textarea name="body" onChange={데이터변경}></textarea>
+          <button className="ui-blue-buttion" onClick={댓글등록}>
+            댓글쓰기
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 function Main() {
   const navigation = useNavigate();
+
   const [article, setArticle] = React.useState({
     title: "",
     body: "",
     user_seq: "",
+    nickname: "",
   });
 
   const { loginUser } = React.useContext(StoreContext);
@@ -186,7 +301,7 @@ function Main() {
         const { code, message, list } = res.data;
         console.log(message);
         if (code === "success") {
-          console.log(list);
+          // console.log(list);
           setArticle(list);
         }
       })
@@ -200,9 +315,10 @@ function Main() {
   }, []);
 
   return (
-    <div>
+    <div className="ui-wrap">
       <h2>{loginUser.nickname}님 안녕하세요!</h2>
       <button
+        className="ui-green-button"
         type="button"
         onClick={() => {
           navigation("/write");
@@ -210,30 +326,27 @@ function Main() {
       >
         글작성하기
       </button>
-      <div>
-        <h2>글목록</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>제목</th>
-              <th>내용</th>
-              <th>작성자</th>
-            </tr>
-          </thead>
-          <tbody>
-            {article.length > 0 &&
-              article.map((item) => {
-                return (
-                  <tr key={item.seq}>
-                    <th>{item.title}</th>
-                    <th>{item.body}</th>
-                    <th>{item.user_seq}</th>
-                  </tr>
-                );
-              })}
-          </tbody>
-        </table>
-      </div>
+      <table className="ui-table">
+        <thead>
+          <tr>
+            <th>제목</th>
+            <th>내용</th>
+            <th>작성자</th>
+          </tr>
+        </thead>
+        <tbody>
+          {article.length > 0 &&
+            article.map((item, index) => {
+              return (
+                <tr key={index}>
+                  <td>{item.title}</td>
+                  <td>{item.body}</td>
+                  <td>{item.nickname}</td>
+                </tr>
+              );
+            })}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -255,8 +368,7 @@ function App() {
     await axios({
       url: "http://localhost:4000/user",
     }).then((res) => {
-      console.log(res.data);
-
+      // console.log(res.data);
       setLoginUser(res.data);
     });
   };
@@ -276,6 +388,7 @@ function App() {
         <Route exact path="/login" element={<Login />} />
         <Route exact path="/join" element={<Join />} />
         <Route exact path="/write" element={<Write />} />
+        <Route exact path="/article/:seq" element={<Article />} />
       </Routes>
     </StoreContext.Provider>
   );

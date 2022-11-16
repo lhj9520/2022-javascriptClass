@@ -192,6 +192,41 @@ app.post("/article", async (req, res) => {
   res.send(result);
 });
 
+app.post("/reply", async (req, res) => {
+  const { user_seq, article_seq, body } = req.body;
+
+  // console.log(req.body);
+
+  const result = {
+    code: "success",
+    message: "댓글등록완료",
+  };
+
+  /**
+   * 로그인 & 빈댓글 예외처리
+   */
+
+  if (user_seq === undefined) {
+    result.code = "fail";
+    result.message = "로그인해주세요";
+  }
+
+  if (body === "") {
+    result.code = "fail";
+    result.message = "댓글을 입력해주세요";
+  }
+
+  if (result.code === "fail") {
+    res.send(result);
+    return;
+  }
+
+  const query = `INSERT INTO reply(boody,user_seq,article_seq) VALUES ('${body}',${user_seq},${article_seq});`;
+  await 디비실행(query);
+
+  res.send(result);
+});
+
 app.get("/articlelist", async (req, res) => {
   const result = {
     code: "success",
@@ -202,11 +237,32 @@ app.get("/articlelist", async (req, res) => {
   /**
    * Mysql article 테이블 전체 조회
    */
-  const query = `SELECT * FROM article`;
+  // const query = `SELECT * FROM article`;
+  const query = `SELECT a.*,u.nickname FROM article AS a, USER AS u WHERE a.user_seq = u.seq;`;
   const 글목록 = await 디비실행(query);
-  // console.log(글목록);
   result.list = 글목록;
+  res.send(result);
+});
 
+app.get("/articleview", async (req, res) => {
+  const { seq } = req.query;
+
+  const result = {
+    code: "success",
+    message: "글상세불러오기",
+    article: [],
+    reply: [],
+  };
+
+  const query = `SELECT a.*,u.nickname FROM article AS a, USER AS u WHERE a.user_seq = u.seq AND a.seq = ${seq};`;
+  const 글상세 = await 디비실행(query);
+  result.article = 글상세;
+
+  const query2 = `SELECT u.nickname,r.boody FROM article AS a, USER AS u, reply AS r WHERE a.seq = ${seq} AND r.user_seq=u.seq AND r.article_seq=a.seq;`;
+  const 댓글목록 = await 디비실행(query2);
+  result.reply = 댓글목록;
+
+  // console.log(result);
   res.send(result);
 });
 
